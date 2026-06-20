@@ -32,7 +32,6 @@ paths:
       operationId: listDebts
       tags: [debts]
       summary: List all debt records
-      description: Returns all debts, optionally filtered by person name and sorted by date
       parameters:
         - name: search
           in: query
@@ -48,6 +47,14 @@ paths:
             enum: [asc, desc]
             default: asc
           description: Sort by date ascending or descending
+        - name: settled
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, yes, no]
+            default: all
+          description: Filter by settled status
       responses:
         "200":
           description: List of debt records
@@ -82,7 +89,6 @@ paths:
       operationId: getDebtSummary
       tags: [debts]
       summary: Get debt summary statistics
-      description: Returns total amount owed and count of open debts
       responses:
         "200":
           description: Summary statistics
@@ -152,6 +158,48 @@ paths:
         "404":
           description: Not found
 
+  /debts/{id}/settle:
+    post:
+      operationId: settleDebt
+      tags: [debts]
+      summary: Mark a debt as settled
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Debt marked as settled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "404":
+          description: Not found
+
+  /debts/{id}/unsettle:
+    post:
+      operationId: unsettleDebt
+      tags: [debts]
+      summary: Mark a settled debt as outstanding again
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Debt marked as outstanding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -179,6 +227,9 @@ components:
           type: ["string", "null"]
         notes:
           type: ["string", "null"]
+        settledAt:
+          type: ["string", "null"]
+          description: ISO timestamp when debt was settled, null if still outstanding
         createdAt:
           type: string
 
@@ -218,9 +269,15 @@ components:
 
     DebtSummary:
       type: object
-      required: [totalAmount, totalCount]
+      required: [totalAmount, totalCount, settledCount, outstandingAmount, outstandingCount]
       properties:
         totalAmount:
           type: number
         totalCount:
+          type: integer
+        settledCount:
+          type: integer
+        outstandingAmount:
+          type: number
+        outstandingCount:
           type: integer

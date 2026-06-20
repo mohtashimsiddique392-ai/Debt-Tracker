@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, debtsTable } from "@workspace/db";
-import { eq, ilike, asc, desc, sql } from "drizzle-orm";
+import { eq, ilike, asc, desc, sql, isNull, isNotNull } from "drizzle-orm";
 import {
   ListDebtsQueryParams,
   CreateDebtBody,
@@ -8,9 +8,20 @@ import {
   UpdateDebtParams,
   UpdateDebtBody,
   DeleteDebtParams,
+  SettleDebtParams,
+  UnsettleDebtParams,
 } from "@workspace/api-zod";
 
 const router = Router();
+
+function serializeDebt(row: typeof debtsTable.$inferSelect) {
+  return {
+    ...row,
+    amount: Number(row.amount),
+    settledAt: row.settledAt ? row.settledAt.toISOString() : null,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
 
 router.get("/debts", async (req, res) => {
   const parsed = ListDebtsQueryParams.safeParse(req.query);
@@ -18,23 +29,22 @@ router.get("/debts", async (req, res) => {
     res.status(400).json({ error: "Invalid query parameters" });
     return;
   }
-  const { search, sortOrder } = parsed.data;
+  const { search, sortOrder, settled } = parsed.data;
 
   const order = sortOrder === "desc" ? desc(debtsTable.date) : asc(debtsTable.date);
+
+  const conditions = [];
+  if (search) conditions.push(ilike(debtsTable.personName, `%${search}%`));
+  if (settled === "yes") conditions.push(isNotNull(debtsTable.settledAt));
+  if (settled === "no") conditions.push(isNull(debtsTable.settledAt));
 
   const rows = await db
     .select()
     .from(debtsTable)
-    .where(search ? ilike(debtsTable.personName, `%${search}%`) : undefined)
+    .where(conditions.length > 0 ? sql`${conditions.reduce((a, b) => sql`${a} AND ${b}`)}` : undefined)
     .orderBy(order);
 
-  const result = rows.map((r) => ({
-    ...r,
-    amount: Number(r.amount),
-    createdAt: r.createdAt.toISOString(),
-  }));
-
-  res.json(result);
+  res.json(rows.map(serializeDebt));
 });
 
 router.post("/debts", async (req, res) => {
@@ -56,24 +66,26 @@ router.post("/debts", async (req, res) => {
     })
     .returning();
 
-  res.status(201).json({
-    ...row,
-    amount: Number(row.amount),
-    createdAt: row.createdAt.toISOString(),
-  });
+  res.status(201).json(serializeDebt(row));
 });
 
 router.get("/debts/summary", async (req, res) => {
   const [summary] = await db
     .select({
-      totalAmount: sql<number>`coalesce(sum(${debtsTable.amount}), 0)::numeric`,
+      totalAmount: sql<number>`coalesce(sum(${debtsTable.amount}), 0)`,
       totalCount: sql<number>`count(*)::int`,
+      settledCount: sql<number>`count(*) filter (where ${debtsTable.settledAt} is not null)::int`,
+      outstandingAmount: sql<number>`coalesce(sum(${debtsTable.amount}) filter (where ${debtsTable.settledAt} is null), 0)`,
+      outstandingCount: sql<number>`count(*) filter (where ${debtsTable.settledAt} is null)::int`,
     })
     .from(debtsTable);
 
   res.json({
     totalAmount: Number(summary.totalAmount),
     totalCount: Number(summary.totalCount),
+    settledCount: Number(summary.settledCount),
+    outstandingAmount: Number(summary.outstandingAmount),
+    outstandingCount: Number(summary.outstandingCount),
   });
 });
 
@@ -94,11 +106,7 @@ router.get("/debts/:id", async (req, res) => {
     return;
   }
 
-  res.json({
-    ...row,
-    amount: Number(row.amount),
-    createdAt: row.createdAt.toISOString(),
-  });
+  res.json(serializeDebt(row));
 });
 
 router.patch("/debts/:id", async (req, res) => {
@@ -133,11 +141,7 @@ router.patch("/debts/:id", async (req, res) => {
     return;
   }
 
-  res.json({
-    ...row,
-    amount: Number(row.amount),
-    createdAt: row.createdAt.toISOString(),
-  });
+  res.json(serializeDebt(row));
 });
 
 router.delete("/debts/:id", async (req, res) => {
@@ -158,6 +162,48 @@ router.delete("/debts/:id", async (req, res) => {
   }
 
   res.status(204).send();
+});
+
+router.post("/debts/:id/settle", async (req, res) => {
+  const parsed = SettleDebtParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  const [row] = await db
+    .update(debtsTable)
+    .set({ settledAt: new Date() })
+    .where(eq(debtsTable.id, parsed.data.id))
+    .returning();
+
+  if (!row) {
+    res.status(404).json({ error: "Debt not found" });
+    return;
+  }
+
+  res.json(serializeDebt(row));
+});
+
+router.post("/debts/:id/unsettle", async (req, res) => {
+  const parsed = UnsettleDebtParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  const [row] = await db
+    .update(debtsTable)
+    .set({ settledAt: null })
+    .where(eq(debtsTable.id, parsed.data.id))
+    .returning();
+
+  if (!row) {
+    res.status(404).json({ error: "Debt not found" });
+    return;
+  }
+
+  res.json(serializeDebt(row));
 });
 
 export default router;

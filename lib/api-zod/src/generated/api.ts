@@ -18,14 +18,15 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Returns all debts, optionally filtered by person name and sorted by date
  * @summary List all debt records
  */
 export const listDebtsQuerySortOrderDefault = `asc`;
+export const listDebtsQuerySettledDefault = `all`;
 
 export const ListDebtsQueryParams = zod.object({
   "search": zod.coerce.string().optional().describe('Search by person name (case-insensitive partial match)'),
-  "sortOrder": zod.enum(['asc', 'desc']).default(listDebtsQuerySortOrderDefault).describe('Sort by date ascending or descending')
+  "sortOrder": zod.enum(['asc', 'desc']).default(listDebtsQuerySortOrderDefault).describe('Sort by date ascending or descending'),
+  "settled": zod.enum(['all', 'yes', 'no']).default(listDebtsQuerySettledDefault).describe('Filter by settled status')
 })
 
 export const ListDebtsResponseItem = zod.object({
@@ -35,6 +36,7 @@ export const ListDebtsResponseItem = zod.object({
   "date": zod.string().describe('ISO date string (YYYY-MM-DD)'),
   "mobileNumber": zod.string().nullish(),
   "notes": zod.string().nullish(),
+  "settledAt": zod.string().nullish().describe('ISO timestamp when debt was settled, null if still outstanding'),
   "createdAt": zod.string()
 })
 export const ListDebtsResponse = zod.array(ListDebtsResponseItem)
@@ -58,12 +60,14 @@ export const CreateDebtBody = zod.object({
 
 
 /**
- * Returns total amount owed and count of open debts
  * @summary Get debt summary statistics
  */
 export const GetDebtSummaryResponse = zod.object({
   "totalAmount": zod.number(),
-  "totalCount": zod.number()
+  "totalCount": zod.number(),
+  "settledCount": zod.number(),
+  "outstandingAmount": zod.number(),
+  "outstandingCount": zod.number()
 })
 
 
@@ -81,6 +85,7 @@ export const GetDebtResponse = zod.object({
   "date": zod.string().describe('ISO date string (YYYY-MM-DD)'),
   "mobileNumber": zod.string().nullish(),
   "notes": zod.string().nullish(),
+  "settledAt": zod.string().nullish().describe('ISO timestamp when debt was settled, null if still outstanding'),
   "createdAt": zod.string()
 })
 
@@ -112,6 +117,7 @@ export const UpdateDebtResponse = zod.object({
   "date": zod.string().describe('ISO date string (YYYY-MM-DD)'),
   "mobileNumber": zod.string().nullish(),
   "notes": zod.string().nullish(),
+  "settledAt": zod.string().nullish().describe('ISO timestamp when debt was settled, null if still outstanding'),
   "createdAt": zod.string()
 })
 
@@ -121,6 +127,44 @@ export const UpdateDebtResponse = zod.object({
  */
 export const DeleteDebtParams = zod.object({
   "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Mark a debt as settled
+ */
+export const SettleDebtParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const SettleDebtResponse = zod.object({
+  "id": zod.number(),
+  "personName": zod.string(),
+  "amount": zod.number(),
+  "date": zod.string().describe('ISO date string (YYYY-MM-DD)'),
+  "mobileNumber": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "settledAt": zod.string().nullish().describe('ISO timestamp when debt was settled, null if still outstanding'),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Mark a settled debt as outstanding again
+ */
+export const UnsettleDebtParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UnsettleDebtResponse = zod.object({
+  "id": zod.number(),
+  "personName": zod.string(),
+  "amount": zod.number(),
+  "date": zod.string().describe('ISO date string (YYYY-MM-DD)'),
+  "mobileNumber": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "settledAt": zod.string().nullish().describe('ISO timestamp when debt was settled, null if still outstanding'),
+  "createdAt": zod.string()
 })
 
 

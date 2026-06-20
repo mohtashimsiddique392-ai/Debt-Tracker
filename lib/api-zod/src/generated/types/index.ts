@@ -12,4 +12,5 @@ export * from './debtSummary';
 export * from './debtUpdate';
 export * from './healthStatus';
 export * from './listDebtsParams';
+export * from './listDebtsSettled';
 export * from './listDebtsSortOrder';

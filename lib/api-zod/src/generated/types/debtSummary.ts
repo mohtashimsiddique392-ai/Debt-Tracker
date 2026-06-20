@@ -9,4 +9,7 @@
 export interface DebtSummary {
   totalAmount: number;
   totalCount: number;
+  settledCount: number;
+  outstandingAmount: number;
+  outstandingCount: number;
 }

@@ -9,6 +9,7 @@ export const debtsTable = pgTable("debts", {
   date: date("date").notNull(),
   mobileNumber: text("mobile_number"),
   notes: text("notes"),
+  settledAt: timestamp("settled_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

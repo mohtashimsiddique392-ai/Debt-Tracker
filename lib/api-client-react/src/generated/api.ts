@@ -134,7 +134,6 @@ export const getListDebtsUrl = (params?: ListDebtsParams,) => {
 }
 
 /**
- * Returns all debts, optionally filtered by person name and sorted by date
  * @summary List all debt records
  */
 export const listDebts = async (params?: ListDebtsParams, options?: RequestInit): Promise<Debt[]> => {
@@ -283,7 +282,6 @@ export const getGetDebtSummaryUrl = () => {
 }
 
 /**
- * Returns total amount owed and count of open debts
  * @summary Get debt summary statistics
  */
 export const getDebtSummary = async ( options?: RequestInit): Promise<DebtSummary> => {
@@ -569,5 +567,145 @@ export const useDeleteDebt = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getDeleteDebtMutationOptions(options));
+    }
+
+export const getSettleDebtUrl = (id: number,) => {
+
+
+
+
+  return `/api/debts/${id}/settle`
+}
+
+/**
+ * @summary Mark a debt as settled
+ */
+export const settleDebt = async (id: number, options?: RequestInit): Promise<Debt> => {
+
+  return customFetch<Debt>(getSettleDebtUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getSettleDebtMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof settleDebt>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof settleDebt>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['settleDebt'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof settleDebt>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  settleDebt(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SettleDebtMutationResult = NonNullable<Awaited<ReturnType<typeof settleDebt>>>
+
+    export type SettleDebtMutationError = ErrorType<void>
+
+    /**
+ * @summary Mark a debt as settled
+ */
+export const useSettleDebt = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof settleDebt>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof settleDebt>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getSettleDebtMutationOptions(options));
+    }
+
+export const getUnsettleDebtUrl = (id: number,) => {
+
+
+
+
+  return `/api/debts/${id}/unsettle`
+}
+
+/**
+ * @summary Mark a settled debt as outstanding again
+ */
+export const unsettleDebt = async (id: number, options?: RequestInit): Promise<Debt> => {
+
+  return customFetch<Debt>(getUnsettleDebtUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getUnsettleDebtMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsettleDebt>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unsettleDebt>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['unsettleDebt'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unsettleDebt>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  unsettleDebt(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnsettleDebtMutationResult = NonNullable<Awaited<ReturnType<typeof unsettleDebt>>>
+
+    export type UnsettleDebtMutationError = ErrorType<void>
+
+    /**
+ * @summary Mark a settled debt as outstanding again
+ */
+export const useUnsettleDebt = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsettleDebt>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unsettleDebt>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getUnsettleDebtMutationOptions(options));
     }
 

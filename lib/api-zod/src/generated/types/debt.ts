@@ -16,5 +16,10 @@ export interface Debt {
   mobileNumber?: string | null;
   /** @nullable */
   notes?: string | null;
+  /**
+     * ISO timestamp when debt was settled, null if still outstanding
+     * @nullable
+     */
+  settledAt?: string | null;
   createdAt: string;
 }

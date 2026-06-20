@@ -19,6 +19,11 @@ export interface Debt {
   mobileNumber?: string | null;
   /** @nullable */
   notes?: string | null;
+  /**
+     * ISO timestamp when debt was settled, null if still outstanding
+     * @nullable
+     */
+  settledAt?: string | null;
   createdAt: string;
 }
 
@@ -48,6 +53,9 @@ export interface DebtUpdate {
 export interface DebtSummary {
   totalAmount: number;
   totalCount: number;
+  settledCount: number;
+  outstandingAmount: number;
+  outstandingCount: number;
 }
 
 export type ListDebtsParams = {
@@ -59,6 +67,10 @@ search?: string;
  * Sort by date ascending or descending
  */
 sortOrder?: ListDebtsSortOrder;
+/**
+ * Filter by settled status
+ */
+settled?: ListDebtsSettled;
 };
 
 export type ListDebtsSortOrder = typeof ListDebtsSortOrder[keyof typeof ListDebtsSortOrder];
@@ -67,5 +79,14 @@ export type ListDebtsSortOrder = typeof ListDebtsSortOrder[keyof typeof ListDebt
 export const ListDebtsSortOrder = {
   asc: 'asc',
   desc: 'desc',
+} as const;
+
+export type ListDebtsSettled = typeof ListDebtsSettled[keyof typeof ListDebtsSettled];
+
+
+export const ListDebtsSettled = {
+  all: 'all',
+  yes: 'yes',
+  no: 'no',
 } as const;
 

@@ -5,6 +5,7 @@
  * Debt Tracker API
  * OpenAPI spec version: 0.1.0
  */
+import type { ListDebtsSettled } from './listDebtsSettled';
 import type { ListDebtsSortOrder } from './listDebtsSortOrder';
 
 export type ListDebtsParams = {
@@ -16,4 +17,8 @@ search?: string;
  * Sort by date ascending or descending
  */
 sortOrder?: ListDebtsSortOrder;
+/**
+ * Filter by settled status
+ */
+settled?: ListDebtsSettled;
 };
