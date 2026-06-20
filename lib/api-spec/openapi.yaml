@@ -3,13 +3,15 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Debt Tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: debts
+    description: Debt record operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,132 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /debts:
+    get:
+      operationId: listDebts
+      tags: [debts]
+      summary: List all debt records
+      description: Returns all debts, optionally filtered by person name and sorted by date
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by person name (case-insensitive partial match)
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          description: Sort by date ascending or descending
+      responses:
+        "200":
+          description: List of debt records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Debt"
+    post:
+      operationId: createDebt
+      tags: [debts]
+      summary: Create a new debt record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebtInput"
+      responses:
+        "201":
+          description: Debt record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "400":
+          description: Invalid input
+
+  /debts/summary:
+    get:
+      operationId: getDebtSummary
+      tags: [debts]
+      summary: Get debt summary statistics
+      description: Returns total amount owed and count of open debts
+      responses:
+        "200":
+          description: Summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebtSummary"
+
+  /debts/{id}:
+    get:
+      operationId: getDebt
+      tags: [debts]
+      summary: Get a single debt record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Debt record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateDebt
+      tags: [debts]
+      summary: Update a debt record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebtUpdate"
+      responses:
+        "200":
+          description: Updated debt record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteDebt
+      tags: [debts]
+      summary: Delete a debt record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted successfully
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +162,65 @@ components:
       required:
         - status
 
+    Debt:
+      type: object
+      required: [id, personName, amount, date, createdAt]
+      properties:
+        id:
+          type: integer
+        personName:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+          description: ISO date string (YYYY-MM-DD)
+        mobileNumber:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    DebtInput:
+      type: object
+      required: [personName, amount, date]
+      properties:
+        personName:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+          minimum: 0
+        date:
+          type: string
+          description: ISO date string (YYYY-MM-DD)
+        mobileNumber:
+          type: string
+        notes:
+          type: string
+
+    DebtUpdate:
+      type: object
+      properties:
+        personName:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+          minimum: 0
+        date:
+          type: string
+        mobileNumber:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    DebtSummary:
+      type: object
+      required: [totalAmount, totalCount]
+      properties:
+        totalAmount:
+          type: number
+        totalCount:
+          type: integer
