@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, debtsTable } from "@workspace/db";
-import { eq, ilike, asc, desc, sql, isNull, isNotNull } from "drizzle-orm";
+import { eq, ilike, asc, desc, sql, isNull, isNotNull, and } from "drizzle-orm";
 import {
   ListDebtsQueryParams,
   CreateDebtBody,
@@ -41,7 +41,7 @@ router.get("/debts", async (req, res) => {
   const rows = await db
     .select()
     .from(debtsTable)
-    .where(conditions.length > 0 ? sql`${conditions.reduce((a, b) => sql`${a} AND ${b}`)}` : undefined)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(order);
 
   res.json(rows.map(serializeDebt));

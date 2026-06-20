@@ -84,7 +84,7 @@ export function DebtForm({ defaultValues, onSubmit, isSubmitting }: DebtFormProp
                     <FormLabel className="text-foreground/80">Amount</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
                         <Input type="number" step="0.01" className="pl-7 bg-background" {...field} />
                       </div>
                     </FormControl>
