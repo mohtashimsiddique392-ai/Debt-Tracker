@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Link } from "wouter";
 import type { Debt } from "@workspace/api-client-react";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Trash2, Edit2, Phone, CheckCircle2, RotateCcw } from "lucide-react";
 import {
@@ -59,7 +59,7 @@ export function DebtCard({ debt, onDelete, onSettle, onUnsettle, isSettling }: D
           </div>
           {isSettled && debt.settledAt && (
             <p className="text-xs text-muted-foreground mt-0.5">
-              Settled {formatDate(debt.settledAt.split("T")[0])}
+              Settled on {formatDateTime(debt.settledAt)}
             </p>
           )}
         </div>
