@@ -1,5 +1,13 @@
 import { createRoot } from "react-dom/client";
+import { setBaseUrl } from "@workspace/api-client-react";
 import App from "./App";
+import { ApiKeyGate } from "@/components/api-key-gate";
 import "./index.css";
 
-createRoot(document.getElementById("root")!).render(<App />);
+setBaseUrl(import.meta.env.VITE_API_URL ?? null);
+
+createRoot(document.getElementById("root")!).render(
+  <ApiKeyGate>
+    <App />
+  </ApiKeyGate>,
+);
