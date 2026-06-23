@@ -1,3 +1,14 @@
+html, body {
+  overscroll-behavior-y: contain;  /* kills pull-to-refresh */
+  -webkit-user-select: none;       /* kills text selection */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; /* kills tap flash */
+}
+
+input, textarea {
+  -webkit-user-select: text;       /* re-enable selection in form fields */
+  user-select: text;
+}
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
