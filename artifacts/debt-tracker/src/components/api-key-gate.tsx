@@ -1,7 +1,6 @@
 import * as React from "react";
-import { setAuthTokenGetter } from "@workspace/api-client-react";
 
-const STORAGE_KEY = "debt-tracker-key";
+export const STORAGE_KEY = "debt-tracker-key";
 
 export function ApiKeyGate({ children }: { children: React.ReactNode }) {
   const [key, setKey] = React.useState<string | null>(() =>
@@ -10,8 +9,6 @@ export function ApiKeyGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = React.useState(false);
 
   React.useEffect(() => {
-    setAuthTokenGetter(() => sessionStorage.getItem(STORAGE_KEY));
-
     function onUnauthorized() {
       sessionStorage.removeItem(STORAGE_KEY);
       setKey(null);
