@@ -36,9 +36,15 @@ export function ApiKeyGate({ children }: { children: React.ReactNode }) {
         <h1 className="text-lg font-semibold">Enter passcode</h1>
         <input
           name="passcode"
-          type="password"
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           autoFocus
           className="w-full rounded-md border px-3 py-2"
+          style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
           placeholder="Passcode"
         />
         {error && <p className="text-sm text-destructive">Wrong passcode, try again.</p>}
