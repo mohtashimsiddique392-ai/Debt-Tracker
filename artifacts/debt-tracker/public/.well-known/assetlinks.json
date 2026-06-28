@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.pages.debt_tracker_237.twa",
+      "sha256_cert_fingerprints": [
+        "64:F2:4A:F5:48:76:28:08:E2:A4:17:7E:DD:F4:7F:3A:E5:B7:84:E7:70:B3:93:0B:10:16:21:C8:99:58:6D:9A"
+      ]
+    }
+  }
+]
